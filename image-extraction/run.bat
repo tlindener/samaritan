@@ -1,1 +1,1 @@
-docker run  --name samaritan-frame-extractor --network kafkadocker_kafkanet tlindener/samaritan-frame-extractor
+docker run  --network samaritan_kafkanet tlindener/samaritan-frame-extractor

@@ -67,7 +67,7 @@ def classify(image,image_file):
     image.save(buffered, format="JPEG")
     img_str = base64.b64encode(buffered.getvalue())
     data = {}
-    data['image'] = str(img_str)
+    data['image'] = img_str.decode("utf-8")
     predictions = []
     thickness = (image.size[0] + image.size[1]) // 300
     for i, c in reversed(list(enumerate(out_classes))):
