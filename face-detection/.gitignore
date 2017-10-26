@@ -2,3 +2,4 @@
 *.mp4
 node_modules/
 mode-pretrained/
+__pycache__/
