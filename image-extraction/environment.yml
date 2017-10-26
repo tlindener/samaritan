@@ -1,0 +1,8 @@
+name: frame-extractor
+channels:
+- defaults
+dependencies:
+- opencv=3.3.0
+- pip:
+  - kafka-python==1.3.5
+prefix: C:\Users\tobias\Anaconda3\envs\frame-extractor

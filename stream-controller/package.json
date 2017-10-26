@@ -1,0 +1,16 @@
+{
+  "name": "samaritan-stream-controller",
+  "version": "1.0.0",
+  "description": "",
+  "main": "controller.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tobias Lindener",
+  "license": "ISC",
+  "dependencies": {
+    "dockerode": "^2.5.2",
+    "lodash": "^4.17.4",
+    "node-zookeeper-client": "^0.2.2"
+  }
+}
