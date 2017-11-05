@@ -12,23 +12,33 @@ from PIL import Image, ImageDraw, ImageFont
 from yad2k.models.keras_yolo import yolo_eval, yolo_head
 import base64
 import json
+from perfmetrics import set_statsd_client
+from perfmetrics import metric
+
+
+set_statsd_client('statsd://statsd-1:8125')
 _scoreTreshold = 0.3
-_iouTreshold= 0.5
+_iouTreshold = 0.5
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-b","--broker",help="Kafka Broker address with port",default="kafkaserver:9092")
-parser.add_argument("-t","--topic",help="Outgoing topic name", default="video-stream-01")
+parser.add_argument(
+    "-b", "--broker", help="Kafka Broker address with port", default="kafkaserver:9092")
+parser.add_argument(
+    "-t", "--topic", help="Outgoing topic name", default="video-stream-01")
 args = parser.parse_args()
-input_topic = "raw-"+args.topic
-output_topic = "person-"+args.topic
+input_topic = "raw-" + args.topic
+output_topic = "person-" + args.topic
 
 
 #  connect to Kafka
 kafka = KafkaClient(args.broker)
 producer = SimpleProducer(kafka)
-consumer = KafkaConsumer(input_topic, group_id='view',bootstrap_servers=[args.broker])
+consumer = KafkaConsumer(input_topic, group_id='view',
+                         bootstrap_servers=[args.broker])
 
-def classify(image,image_file):
+
+@metric
+def classify(image, image_file):
     # Generate output tensor targets for filtered bounding boxes.
     # TODO: Wrap these backend operations with Keras layers.
     yolo_outputs = yolo_head(yolo_model.output, anchors, len(class_names))
@@ -63,11 +73,9 @@ def classify(image,image_file):
             K.learning_phase(): 0
         })
 
-    buffered = io.BytesIO()
-    image.save(buffered, format="JPEG")
-    img_str = base64.b64encode(buffered.getvalue())
+
     data = {}
-    data['image'] = img_str.decode("utf-8")
+    data['image'] = getBase64Image(image)
     predictions = []
     thickness = (image.size[0] + image.size[1]) // 300
     for i, c in reversed(list(enumerate(out_classes))):
@@ -80,12 +88,12 @@ def classify(image,image_file):
         bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
         right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
         prediction = {}
-        prediction['label']= predicted_class
-        prediction['score']= int(score*100)
-        prediction['top']= int(top)
-        prediction['left']= int(left)
-        prediction['bottom']= int(bottom)
-        prediction['right']= int(right)
+        prediction['label'] = predicted_class
+        prediction['score'] = int(score * 100)
+        prediction['top'] = int(top)
+        prediction['left'] = int(left)
+        prediction['bottom'] = int(bottom)
+        prediction['right'] = int(right)
         if predicted_class == "person":
             print(predicted_class)
             draw = ImageDraw.Draw(image)
@@ -97,13 +105,38 @@ def classify(image,image_file):
         predictions.append(prediction)
 
     data['predictions'] = predictions
+    data['image_bb'] = getBase64Image(image)
+    # print(json.dumps(data))
+    print("send message")
+    producer.send_messages(output_topic, json.dumps(data).encode('utf-8'))
+
+def getBase64Image(image):
     buffered = io.BytesIO()
     image.save(buffered, format="JPEG")
     img_str = base64.b64encode(buffered.getvalue())
-    data['image_bb'] = str(img_str)
-    # print(json.dumps(data))
-    print("send message")
-    producer.send_messages(output_topic,json.dumps(data).encode('utf-8'))
+    return img_str.decode("utf-8")
+
+def get_classes(classes_path):
+    '''loads the classes'''
+    with open(classes_path) as f:
+        class_names = f.readlines()
+    class_names = [c.strip() for c in class_names]
+    return class_names
+
+
+def get_anchors(anchors_path):
+    '''loads the anchors from a file'''
+    if os.path.isfile(anchors_path):
+        with open(anchors_path) as f:
+            anchors = f.readline()
+            anchors = [float(x) for x in anchors.split(',')]
+            return np.array(anchors).reshape(-1, 2)
+    else:
+        Warning("Could not open anchors file, using default.")
+        return np.array(
+            ((0.57273, 0.677385), (1.87446, 2.06253), (3.33843, 5.47434),
+             (7.88282, 3.52778), (9.77052, 9.16828)))
+
 
 if __name__ == '__main__':
     print("start person detector")
@@ -118,15 +151,8 @@ if __name__ == '__main__':
         os.mkdir(output_path)
     sess = K.get_session()  # TODO: Remove dependence on Tensorflow session.
 
-    with open(classes_path) as f:
-        class_names = f.readlines()
-
-    class_names = [c.strip() for c in class_names]
-
-    with open(anchors_path) as f:
-        anchors = f.readline()
-        anchors = [float(x) for x in anchors.split(',')]
-        anchors = np.array(anchors).reshape(-1, 2)
+    class_names = get_classes(classes_path)
+    anchors = get_anchors(anchors_path)
 
     yolo_model = load_model(model_path)
 
@@ -147,7 +173,7 @@ if __name__ == '__main__':
     colors = list(
         map(lambda x: (int(x[0] * 255), int(x[1] * 255), int(x[2] * 255)),
             colors))
-    random.seed(10101) # Fixed seed for consistent colors across runs.
+    random.seed(10101)  # Fixed seed for consistent colors across runs.
     # Check if model is fully convolutional, assuming channel last order.
     model_image_size = yolo_model.layers[0].input_shape[1:3]
     is_fixed_size = model_image_size != (None, None)

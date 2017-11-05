@@ -44,6 +44,7 @@ services:
       - kafkanet
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.3
+    container_name: elasticsearch2
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -60,6 +61,7 @@ services:
       - kafkanet
   statsd:
     image: hopsoft/graphite-statsd
+    container_name: statsd-1
     ports:
       - 3002:80
       - 2003:2003
@@ -68,6 +70,7 @@ services:
       - kafkanet
   grafana:
     image: grafana/grafana
+    container_name: grafana-1
     ports:
       - 3001:3000
     networks:
@@ -80,5 +83,3 @@ volumes:
     driver: local
   esdata2:
     driver: local
-
-
