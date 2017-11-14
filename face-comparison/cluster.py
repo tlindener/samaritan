@@ -37,10 +37,9 @@ def save_image(data,embedding_map, index,cnt,path):
     base_image = stringToImage(data[indices[0]]['image'])
     prediction = data[indices[0]]['predictions'][indices[1]]
     image = toRGB(base_image)
-    cropped = image[prediction['top']:prediction['bottom'],
+    frame = image[prediction['top']:prediction['bottom'],
                                         prediction['left']:prediction['right']]
     face_bb = data[indices[0]]['predictions'][indices[1]]['faces'][indices[2]]['bounding_box']
-    frame = toRGB(cropped)
     cv2.rectangle(frame,
                   (face_bb[0], face_bb[1]), (face_bb[2], face_bb[3]),
                   (0, 255, 0), 2)
@@ -61,7 +60,6 @@ def main(args):
                         embeddings.append(face["embedding"])
                         embedding_map[len(embeddings) -
                                       1] = (f_index, p_index, d_index)
-                        print((f_index, p_index, d_index))
 
     nrof_images = len(embeddings)
 
