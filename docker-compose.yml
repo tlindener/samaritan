@@ -1,5 +1,4 @@
-version: "2"
-
+version: "3"
 services:
   kafkaserver:
     image: "spotify/kafka:latest"
@@ -24,44 +23,45 @@ services:
       - kafkaserver
     environment:
       ZK_HOSTS: "kafkaserver:2181"
-  elasticsearch1:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.3
-    container_name: elasticsearch1
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 1g
-    volumes:
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-    networks:
-      - kafkanet
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.3
-    container_name: elasticsearch2
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    mem_limit: 1g
-    volumes:
-      - esdata2:/usr/share/elasticsearch/data
-    networks:
-      - kafkanet
-  statsd:
+  # elasticsearch1:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:5.6.3
+  #   container_name: elasticsearch1
+  #   environment:
+  #     - cluster.name=docker-cluster
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   mem_limit: 1g
+  #   volumes:
+  #     - esdata1:/usr/share/elasticsearch/data
+  #   ports:
+  #     - 9200:9200
+  #   networks:
+  #     - kafkanet
+  # elasticsearch2:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:5.6.3
+  #   container_name: elasticsearch2
+  #   environment:
+  #     - cluster.name=docker-cluster
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #   mem_limit: 1g
+  #   volumes:
+  #     - esdata2:/usr/share/elasticsearch/data
+  #   networks:
+  #     - kafkanet
+  statsd-1:
     image: hopsoft/graphite-statsd
     container_name: statsd-1
+    hostname: statsd-1
     ports:
       - 3002:80
       - 2003:2003
@@ -70,7 +70,8 @@ services:
       - kafkanet
   grafana:
     image: grafana/grafana
-    container_name: grafana-1
+    hostname: grafana
+    container_name: grafana
     ports:
       - 3001:3000
     networks:

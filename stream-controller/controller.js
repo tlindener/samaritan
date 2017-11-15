@@ -43,12 +43,31 @@ function startPersonDetector(children) {
   });
   personVideoStreams.forEach(function(item) {
     console.log(item);
-    var container = docker.getContainer(item);
-    console.log(container);
-    container.inspect(function(err, data) {
-      if(data === null)
-      {
+    var id = item.replace('raw', 'person');
+    var container = docker.getContainer(id);
 
+    container.inspect(function(err, data) {
+      console.log(err);
+      if (err != null && err.statusCode === 404) {
+        console.log("start container: " + id);
+        docker.createContainer({
+          Image: 'tlindener/samaritan-person-detector',
+          Cmd: ["python", "-u", "consumer.py"],
+          name: id
+        }, function(err, container) {
+          container.start({
+            "HostConfig": {
+              "NetworkMode": "samaritan_kafkanet"
+            }
+          }, function(err, data) {
+            //...
+          });
+        });
+      }
+      if (data != null) {
+        if (!data.State.Running) {
+          console.log("not running");
+        }
       }
     });
 
