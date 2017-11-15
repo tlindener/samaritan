@@ -15,10 +15,8 @@ sudo add-apt-repository \
    $(lsb_release -cs) \
    stable"
 sudo apt-get update
-sudo apt-get install docker-ce
-USER = whoami
+sudo apt-get install docker-ce docker-compose -y
 sudo usermod -aG docker $USER
-wget http://mirror.fibergrid.in/apache/kafka/0.10.0.1/kafka_2.10-0.10.0.1.tgz
-mkdir ~/kafka
+wget http://apache.mirrors.spacedump.net/kafka/1.0.0/kafka_2.12-1.0.0.tgz 
 sudo tar -xvf kafka_2.10-0.10.0.1.tgz -C ~/
 mv kafka_2.10-0.10.0.1 kafka

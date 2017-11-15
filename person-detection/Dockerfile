@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
 RUN groupadd -r samaritan && useradd -r -g samaritan samaritan
 
 WORKDIR /app
-RUN wget http://pjreddie.com/media/files/yolo.weights && \
-    wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg
+#RUN wget http://pjreddie.com/media/files/yolo.weights && \
+#    wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg
 
 # Install myapp requirements
 COPY environment.yml /app/environment.yml
