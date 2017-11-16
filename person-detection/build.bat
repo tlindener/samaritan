@@ -1,1 +1,1 @@
-docker build -t tlindener/samaritan-person-detector .
+docker build -t tlindener/samaritan-person-detection .
