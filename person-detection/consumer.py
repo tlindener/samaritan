@@ -12,9 +12,6 @@ from PIL import Image, ImageDraw, ImageFont
 from yad2k.models.keras_yolo import yolo_eval, yolo_head
 import base64
 import json
-from perfmetrics import set_statsd_client
-from perfmetrics import metric
-from perfmetrics import MetricMod
 from statsd import StatsClient
 
 _scoreTreshold = 0.3
@@ -32,7 +29,7 @@ output_topic = "person-" + args.topic
 statsd = StatsClient(host='statsd-1',
                      port=8125,
                      prefix=output_topic)
-set_statsd_client(statsd)
+
 
 #  connect to Kafka
 kafka = KafkaClient(args.broker)
@@ -41,8 +38,7 @@ consumer = KafkaConsumer(input_topic, group_id='view',
                          bootstrap_servers=[args.broker])
 
 
-@metric
-@MetricMod(output_topic+".%s")
+@statsd.timer('person-detection.find_person')
 def classify(image, image_file):
     # Generate output tensor targets for filtered bounding boxes.
     # TODO: Wrap these backend operations with Keras layers.

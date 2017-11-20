@@ -37,9 +37,6 @@ import io
 import cv2
 import numpy as np
 from PIL import Image
-from perfmetrics import metric
-from perfmetrics import MetricMod
-from perfmetrics import set_statsd_client
 from statsd import StatsClient
 
 # Take in base64 string and return PIL image
@@ -62,8 +59,6 @@ consumer = KafkaConsumer(input_topic, group_id='view', bootstrap_servers=[args.b
 statsd = StatsClient(host='statsd-1',
                      port=8125,
                      prefix=output_topic)
-set_statsd_client(statsd)
-
 
 
 def stringToImage(base64_string):
@@ -105,8 +100,7 @@ def main():
             find_faces(message.offset,data)
 
 
-@metric
-@MetricMod(output_topic + ".%s")
+@statsd.timer('face-detection.find_faces')
 def find_faces(message_offset, data):
     image = toRGB(stringToImage(data['image']))
     for index, prediction in enumerate(data['predictions']):
