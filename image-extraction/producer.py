@@ -5,7 +5,8 @@ import argparse
 from perfmetrics import metric
 from perfmetrics import MetricMod
 from perfmetrics import set_statsd_client
-set_statsd_client('statsd://statsd-1:8125')
+from statsd import StatsClient
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--input",help="Video Input", default="input.mkv")
@@ -17,6 +18,10 @@ args = parser.parse_args()
 producer = KafkaProducer(bootstrap_servers=[args.broker])
 # Assign a topic
 topic = args.topic
+statsd = StatsClient(host='statsd-1',
+                     port=8125,
+                     prefix=topic)
+set_statsd_client(statsd)
 
 def video_emitter(video):
     # Open the video

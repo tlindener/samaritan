@@ -15,8 +15,8 @@ import json
 from perfmetrics import set_statsd_client
 from perfmetrics import metric
 from perfmetrics import MetricMod
+from statsd import StatsClient
 
-set_statsd_client('statsd://statsd-1:8125')
 _scoreTreshold = 0.3
 _iouTreshold = 0.5
 
@@ -29,6 +29,10 @@ args = parser.parse_args()
 input_topic = "raw-" + args.topic
 output_topic = "person-" + args.topic
 
+statsd = StatsClient(host='statsd-1',
+                     port=8125,
+                     prefix=output_topic)
+set_statsd_client(statsd)
 
 #  connect to Kafka
 kafka = KafkaClient(args.broker)
