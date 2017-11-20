@@ -4,7 +4,7 @@ from kafka import KafkaProducer, KafkaClient
 import argparse
 from perfmetrics import metric
 from perfmetrics import MetricMod
-
+from perfmetrics import set_statsd_client
 set_statsd_client('statsd://statsd-1:8125')
 
 parser = argparse.ArgumentParser()

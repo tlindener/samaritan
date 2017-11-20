@@ -39,7 +39,7 @@ import numpy as np
 from PIL import Image
 from perfmetrics import metric
 from perfmetrics import MetricMod
-
+from perfmetrics import set_statsd_client
 set_statsd_client('statsd://statsd-1:8125')
 # Take in base64 string and return PIL image
 parser = argparse.ArgumentParser()
