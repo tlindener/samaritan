@@ -101,8 +101,8 @@ def main(args):
                             print("Adding face num: " + str(index))
             producer.send_messages(
                 output_topic, json.dumps(data).encode('utf-8'))
-            with open(str(message.offset) + "_" + str(index) + ".json", 'w') as outfile:
-                json.dump(data, outfile)
+            #with open(str(message.offset) + "_" + str(index) + ".json", 'w') as outfile:
+            #    json.dump(data, outfile)
 
 
 #    frame = cv2.imread('test.jpg')
