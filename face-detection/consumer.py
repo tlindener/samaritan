@@ -40,8 +40,8 @@ from PIL import Image
 from perfmetrics import metric
 from perfmetrics import MetricMod
 from perfmetrics import set_statsd_client
+from statsd import StatsClient
 
-set_statsd_client('statsd://statsd-1:8125')
 # Take in base64 string and return PIL image
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -53,10 +53,17 @@ parser.add_argument('--debug', action='store_true',
 args = parser.parse_args()
 input_topic = "person-" + args.topic
 output_topic = "face-" + args.topic
+
 face_recognition = face.Recognition()
 kafka = KafkaClient(args.broker)
 producer = SimpleProducer(kafka)
 consumer = KafkaConsumer(input_topic, group_id='view', bootstrap_servers=[args.broker])
+
+statsd = StatsClient(host='statsd-1',
+                     port=8125,
+                     prefix=output_topic)
+set_statsd_client(statsd)
+
 
 
 def stringToImage(base64_string):
