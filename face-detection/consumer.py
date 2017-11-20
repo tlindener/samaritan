@@ -37,8 +37,21 @@ import io
 import cv2
 import numpy as np
 from PIL import Image
+from perfmetrics import metric
+from perfmetrics import MetricMod
 
+set_statsd_client('statsd://statsd-1:8125')
 # Take in base64 string and return PIL image
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-b", "--broker", help="Kafka Broker address with port", default="kafkaserver:9092")
+parser.add_argument(
+    "-t", "--topic", help="Outgoing topic name", default="video-stream-01")
+parser.add_argument('--debug', action='store_true',
+                    help='Enable some debug outputs.')
+args = parser.parse_args()
+input_topic = "person-" + args.topic
+output_topic = "face-" + args.topic
 
 
 def stringToImage(base64_string):
@@ -65,11 +78,10 @@ def add_overlays(frame, faces):
                             thickness=2, lineType=2)
 
 
-def main(args):
+def main():
     face_recognition = face.Recognition()
     start_time = time.time()
-    input_topic = "person-" + args.topic
-    output_topic = "face-" + args.topic
+
     kafka = KafkaClient(args.broker)
     producer = SimpleProducer(kafka)
     consumer = KafkaConsumer(input_topic, group_id='view',
@@ -83,41 +95,30 @@ def main(args):
         if message is not None:
             print(message.offset)
             data = json.loads(message.value.decode("utf-8"))
-            # print(data)
-            image = toRGB(stringToImage(data['image']))
-            for index, prediction in enumerate(data['predictions']):
-                if prediction['label'] == 'person':
-                    cropped = image[prediction['top']:prediction['bottom'],
-                                    prediction['left']:prediction['right']]
-                    print("classify image")
-                    faces = face_recognition.identify(cropped)
-                    if len(faces) > 0:
-                        data['predictions'][index]['faces'] = []
-                        for f_face in faces:
-                            i_face = {}
-                            i_face['bounding_box'] = f_face.bounding_box.tolist()
-                            i_face['embedding'] = f_face.embedding.tolist()
-                            data['predictions'][index]['faces'].append(i_face)
-                            print("Adding face num: " + str(index))
-            producer.send_messages(
-                output_topic, json.dumps(data).encode('utf-8'))
-            with open(str(message.offset) + "_" + str(index) + ".json", 'w') as outfile:
-                json.dump(data, outfile)
+            find_faces(message.offset,data)
 
 
-#    frame = cv2.imread('test.jpg')
-
-
-def parse_arguments(argv):
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-b", "--broker", help="Kafka Broker address with port", default="kafkaserver:9092")
-    parser.add_argument(
-        "-t", "--topic", help="Outgoing topic name", default="video-stream-01")
-    parser.add_argument('--debug', action='store_true',
-                        help='Enable some debug outputs.')
-    return parser.parse_args(argv)
+@metric
+@MetricMod(topic + ".%s")
+def find_faces(message_offset, data):
+    image = toRGB(stringToImage(data['image']))
+    for index, prediction in enumerate(data['predictions']):
+        if prediction['label'] == 'person':
+            cropped = image[prediction['top']:prediction['bottom'],
+                            prediction['left']:prediction['right']]
+            print("classify image")
+            faces = face_recognition.identify(cropped)
+            if len(faces) > 0:
+                data['predictions'][index]['faces'] = []
+                for f_face in faces:
+                    i_face = {}
+                    i_face['bounding_box'] = f_face.bounding_box.tolist()
+                    i_face['embedding'] = f_face.embedding.tolist()
+                    data['predictions'][index]['faces'].append(i_face)
+                    print("Adding face num: " + str(index))
+    producer.send_messages(
+        output_topic, json.dumps(data).encode('utf-8'))
 
 
 if __name__ == '__main__':
-    main(parse_arguments(sys.argv[1:]))
+    main()

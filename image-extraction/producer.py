@@ -2,6 +2,10 @@ import time
 import cv2
 from kafka import KafkaProducer, KafkaClient
 import argparse
+from perfmetrics import metric
+from perfmetrics import MetricMod
+
+set_statsd_client('statsd://statsd-1:8125')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--input",help="Video Input", default="input.mkv")
@@ -29,13 +33,18 @@ def video_emitter(video):
         # convert the image png
         ret, jpeg = cv2.imencode('.jpg', image)
         # Convert the image to bytes and send to kafka
-
-        future = producer.send(topic, jpeg.tobytes())
-        result = future.get(timeout=10)
+        send_image(jpeg)
         print(result)
     # clear the capture
     video.release()
     print('done emitting')
+
+@metric
+@MetricMod(topic+".%s")
+def send_image(jpeg):
+    future = producer.send(topic, jpeg.tobytes())
+    result = future.get(timeout=10)
+
 
 if __name__ == '__main__':
     print("Run Video Emitter")

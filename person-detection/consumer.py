@@ -14,7 +14,7 @@ import base64
 import json
 from perfmetrics import set_statsd_client
 from perfmetrics import metric
-
+from perfmetrics import MetricMod
 
 set_statsd_client('statsd://statsd-1:8125')
 _scoreTreshold = 0.3
@@ -38,6 +38,7 @@ consumer = KafkaConsumer(input_topic, group_id='view',
 
 
 @metric
+@MetricMod(output_topic+".%s")
 def classify(image, image_file):
     # Generate output tensor targets for filtered bounding boxes.
     # TODO: Wrap these backend operations with Keras layers.
