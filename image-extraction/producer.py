@@ -39,7 +39,7 @@ def video_emitter(video):
         ret, jpeg = cv2.imencode('.jpg', image)
         # Convert the image to bytes and send to kafka
         send_image(jpeg)
-        print(result)
+        
     # clear the capture
     video.release()
     print('done emitting')
@@ -49,7 +49,7 @@ def video_emitter(video):
 def send_image(jpeg):
     future = producer.send(topic, jpeg.tobytes())
     result = future.get(timeout=10)
-
+    print(result)
 
 if __name__ == '__main__':
     print("Run Video Emitter")

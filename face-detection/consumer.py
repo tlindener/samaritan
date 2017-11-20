@@ -53,10 +53,17 @@ parser.add_argument('--debug', action='store_true',
 args = parser.parse_args()
 input_topic = "person-" + args.topic
 output_topic = "face-" + args.topic
+
+face_recognition = face.Recognition()
+kafka = KafkaClient(args.broker)
+producer = SimpleProducer(kafka)
+consumer = KafkaConsumer(input_topic, group_id='view', bootstrap_servers=[args.broker])
+
 statsd = StatsClient(host='statsd-1',
                      port=8125,
                      prefix=output_topic)
 set_statsd_client(statsd)
+
 
 
 def stringToImage(base64_string):
@@ -84,13 +91,8 @@ def add_overlays(frame, faces):
 
 
 def main():
-    face_recognition = face.Recognition()
     start_time = time.time()
 
-    kafka = KafkaClient(args.broker)
-    producer = SimpleProducer(kafka)
-    consumer = KafkaConsumer(input_topic, group_id='view',
-                             bootstrap_servers=[args.broker])
     if args.debug:
         print("Debug enabled")
         face.debug = True
@@ -104,7 +106,7 @@ def main():
 
 
 @metric
-@MetricMod(topic + ".%s")
+@MetricMod(output_topic + ".%s")
 def find_faces(message_offset, data):
     image = toRGB(stringToImage(data['image']))
     for index, prediction in enumerate(data['predictions']):
