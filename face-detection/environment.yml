@@ -1,14 +1,17 @@
 name: yad2k
 channels:
 - defaults
+- intel
 dependencies:
-- pillow
-- scipy
-- h5py
+- python=3.6
+- pillow=4.2.*
+- scipy=0.19.*
+- h5py=2.7.*
+- tensorflow-tensorboard=0.1.*
+- protobuf=3.4.*
 - scikit-learn
 - pip:
-  - https://anaconda.org/intel/tensorflow/1.3.0/download/tensorflow-1.3.0-cp36-cp36m-linux_x86_64.whl
+  - /tmp/pip/tensorflow-1.3.1-cp36-cp36m-linux_x86_64.whl
   - kafka-python==1.3.5
   - opencv-python
   - statsd==3.2.1
-prefix: /home/allan/anaconda3/envs/yad2k

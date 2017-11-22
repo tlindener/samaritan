@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:latest
+FROM samaritan/base:latest
 
 # Install extra packages if required
 RUN apt-get update && apt-get install -y \
