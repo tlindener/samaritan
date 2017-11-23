@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install wget ca-certificates -y \
 RUN groupadd -r samaritan && useradd -r -g samaritan samaritan
 
 WORKDIR /app
-#RUN wget http://pjreddie.com/media/files/yolo.weights && \
-#    wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg
+RUN wget http://pjreddie.com/media/files/yolo.weights && \
+    wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg
 
 RUN conda install numpy scipy
 
@@ -25,5 +25,5 @@ RUN chown -R samaritan:samaritan /app/*
 
 # activate the myapp environment
 ENV PATH /opt/conda/envs/samaritan-person-detector/bin:$PATH
-#RUN ./yad2k.py yolo.cfg yolo.weights model_data/yolo.h5
+RUN python yad2k.py yolo.cfg yolo.weights model_data/yolo.h5
 CMD ["python","-u","consumer.py"]
