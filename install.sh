@@ -19,4 +19,4 @@ sudo apt-get install docker-ce docker-compose -y
 sudo usermod -aG docker $USER
 wget http://apache.mirrors.spacedump.net/kafka/1.0.0/kafka_2.12-1.0.0.tgz 
 sudo tar -xvf kafka_2.12-1.0.0.tgz -C ~/
-mv kafka_2.12-1.0.0 kafka
+mv ~/kafka_2.12-1.0.0 ~/kafka
