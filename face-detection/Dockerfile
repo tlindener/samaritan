@@ -1,6 +1,5 @@
-FROM continuumio/miniconda3:latest
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+FROM samaritan/miniconda3:latest
+
 # Install extra packages if required
 RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
