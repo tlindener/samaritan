@@ -1,5 +1,5 @@
 #!/bin/bash
-for number in {1..2}
+for number in {1..5}
 do
 raw="raw-video-stream-"$number
 person="person-video-stream-"$number

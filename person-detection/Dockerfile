@@ -1,5 +1,6 @@
 FROM continuumio/miniconda3:latest
-
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 # Install extra packages if required
 RUN apt-get update && apt-get install wget ca-certificates -y \
     && rm -rf /var/lib/apt/lists/*
@@ -10,8 +11,6 @@ RUN groupadd -r samaritan && useradd -r -g samaritan samaritan
 WORKDIR /app
 RUN wget http://pjreddie.com/media/files/yolo.weights && \
     wget https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolo.cfg
-
-RUN conda install numpy scipy
 
 # Install myapp requirements
 COPY environment.yml /app/environment.yml
