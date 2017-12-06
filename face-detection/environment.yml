@@ -2,6 +2,7 @@ name: yad2k
 channels:
 - defaults
 dependencies:
+- python=3.6
 - pillow
 - scipy
 - h5py

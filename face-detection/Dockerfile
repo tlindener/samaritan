@@ -20,6 +20,8 @@ COPY . /app/
 RUN chown -R samaritan:samaritan /app/*
 
 # activate the myapp environment
+ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV PATH /opt/conda/envs/samaritan-face-detector/bin:$PATH
 
 CMD ["python","-u","consumer.py"]

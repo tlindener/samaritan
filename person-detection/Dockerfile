@@ -21,6 +21,8 @@ RUN conda config --add channels conda-forge \
 COPY . /app/
 RUN chown -R samaritan:samaritan /app/*
 
+ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 # activate the myapp environment
 ENV PATH /opt/conda/envs/samaritan-person-detector/bin:$PATH
 RUN python yad2k.py yolo.cfg yolo.weights model_data/yolo.h5
