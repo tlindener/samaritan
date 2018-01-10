@@ -10,5 +10,8 @@ The project provides various scripts to make this usable. The project requires a
 ## Requirements
 Ubuntu >= 16.04
 Docker
+Docker Compose
 
 # Credits
+YAD2K: Yet Another Darknet 2 Keras [https://github.com/allanzelener/YAD2K]
+Face Recognition using Tensorflow [https://github.com/davidsandberg/facenet
