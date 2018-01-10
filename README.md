@@ -13,5 +13,6 @@ Docker
 Docker Compose
 
 # Credits
-YAD2K: Yet Another Darknet 2 Keras [https://github.com/allanzelener/YAD2K]
-Face Recognition using Tensorflow [https://github.com/davidsandberg/facenet
+- [YAD2K: Yet Another Darknet 2 Keras](https://github.com/allanzelener/YAD2K)
+- [Face Recognition using Tensorflow](https://github.com/davidsandberg/facenet)
+
